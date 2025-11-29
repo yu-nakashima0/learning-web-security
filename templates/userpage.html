@@ -2,11 +2,34 @@
 <html>
 <head>
     <title>User page</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        window.currentUser = "{{ username }}";
+    </script>
 </head>
 <body>
     <h1>Welcome to my website!</h1>
+
+    <h3>User info</h3>
+    Username: {{ username }}
+    <br><br>
+
     <form method="POST">
-        <button type="submit">Logout</button>
+        <button type="submit" name="action" value="logout">Logout</button>
     </form>
+
+    <hr>
+
+    <h3>Chat</h3>
+
+    <input id="receiver" type="text" placeholder="Receiver username">
+    <br><br>
+
+    <input id="chat_input" type="text" placeholder="Your message">
+    <button id="send-btn">Send</button>
+
+    <div id="chat-display"></div>
+
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
 </body>
 </html>

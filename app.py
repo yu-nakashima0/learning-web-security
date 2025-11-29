@@ -2,19 +2,35 @@ from flask import Flask, request, render_template ,redirect, url_for, session
 from config import Config
 import sqlite3
 from werkzeug.security import generate_password_hash,check_password_hash
+from flask_socketio import SocketIO, emit
+
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
+socketio = SocketIO(app) #socket
 
+
+
+"""
+databank
+"""
 def get_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     return conn
 
+"""
+start page
+"""
 @app.route('/')
 def home():
     return redirect(url_for('login'))
 
+
+"""
+register page
+"""
 @app.route('/register', methods=['GET','POST'])
 def register():
     print("user registerd")
@@ -42,6 +58,10 @@ def register():
     
     return render_template('register.html')
 
+
+"""
+login page
+"""
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
@@ -68,21 +88,34 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/userpage')
+"""
+userpage
+"""
+@app.route('/userpage', methods=['GET', 'POST'])
 def userpage():
-    if 'username' in session:
-        print(f"Hello, {session['username']}! You are logged in.")
-        return render_template('userpage.html')
-    else:
+    if 'username' not in session:
         return redirect(url_for('login'))
 
-@app.route('/userpage', methods=['POST'])
-def logout():
+    # Logout with POST
     if request.method == 'POST':
         session.clear()
         return redirect(url_for('login'))
-    else:
-        return redirect(url_for('userpage'))
 
+    # Only pass username to template
+    return render_template('userpage.html', username=session['username'])
+
+"""
+chat message
+"""
+@socketio.on("chat_message")
+def handle_chat(data):
+    emit("chat_message", data, broadcast=True)
+
+
+
+"""
+start app
+"""
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000,debug=True)
+    #app.run(host='0.0.0.0', port=5000,debug=True)
+    socketio.run(app, host='0.0.0.0', port= 5000, debug= True)
