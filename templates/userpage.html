@@ -3,6 +3,8 @@
 <head>
     <title>User page</title>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <!-- Pass logged-in username to JavaScript -->
     <script>
         window.currentUser = "{{ username }}";
     </script>
@@ -10,8 +12,8 @@
 <body>
     <h1>Welcome to my website!</h1>
 
-    <h3>User info</h3>
-    Username: {{ username }}
+    <h3>User Info</h3>
+    Logged in as: <b>{{ username }}</b>
     <br><br>
 
     <form method="POST">
@@ -20,13 +22,15 @@
 
     <hr>
 
-    <h3>Chat</h3>
+    <h3>Private Chat</h3>
 
-    <input id="receiver" type="text" placeholder="Receiver username">
+    <input id="receiver" type="text" placeholder="Send to username">
     <br><br>
 
     <input id="chat_input" type="text" placeholder="Your message">
     <button id="send-btn">Send</button>
+
+    <hr>
 
     <div id="chat-display"></div>
 

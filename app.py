@@ -10,6 +10,8 @@ app = Flask(__name__)
 app.config.from_object(Config)
 socketio = SocketIO(app) #socket
 
+# Store username → socket session ID
+connected_users = {}
 
 
 """
@@ -89,6 +91,25 @@ def login():
 
 
 """
+connect
+"""
+@socketio.on("connect_user")
+def connect_user(username): 
+    connected_users[username] = request.sid
+    print(f"User connected: {username} -> {request.sid}")
+
+
+"""
+disconnect
+"""
+@socketio.on("disconnect")
+def disconnect_user():
+    for user,sid in list(connected_users.items()):
+        if sid == request.sid:
+            del connected_users[user]
+            print(f"User disconnected: {user}")
+
+"""
 userpage
 """
 @app.route('/userpage', methods=['GET', 'POST'])
@@ -109,7 +130,16 @@ chat message
 """
 @socketio.on("chat_message")
 def handle_chat(data):
-    emit("chat_message", data, broadcast=True)
+    sender = data["sender"]
+    receiver = data["receiver"]
+
+    # send to receiver only
+    if receiver in connected_users:
+        emit("chat_message", data, room=connected_users[receiver])
+
+    # send back to sender
+    if sender in connected_users:
+        emit("chat_message", data, room=connected_users[sender])
 
 
 
